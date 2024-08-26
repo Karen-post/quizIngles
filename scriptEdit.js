@@ -19,148 +19,224 @@ let renderListaPortugues =
   listaLocalStoragePortugues.length > 0
     ? listaLocalStoragePortugues
     : listaPortugues;
-
+// Função para renderizar a lista em inglês
 const inglesLista = () => {
   const listaContainer = document.getElementById("listaInglesContainer");
   listaContainer.innerHTML = ""; // Limpa o conteúdo antes de renderizar
 
-  const items = renderListaIngles
-    .map(
-      (item, index) => `
-    <li>
-      ${item.pergunta}: ${item.resposta.join(", ")}
-      <button data-id="${index}" onclick="editarItemI(event)">Editar</button>
-    </li>
-  `
-    )
-    .join("");
-
-  listaContainer.innerHTML = items;
+  renderListaIngles.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.setAttribute("draggable", true);
+    li.dataset.id = index;
+    li.innerHTML = `${item.pergunta}: ${item.resposta.join(", ")}
+      <button onclick="editarItemI(event)">Editar</button>
+      <button onclick="apagarItemI(event)">Apagar</button>`;
+    li.addEventListener("dragstart", handleDragStart);
+    li.addEventListener("dragover", handleDragOver);
+    li.addEventListener("drop", handleDrop);
+    document.getElementById("listaInglesContainer").appendChild(li);
+  });
 };
 
+// Função para renderizar a lista em português
 const PortuguesLista = () => {
   const listaContainer = document.getElementById("listaPortuguesContainer");
   listaContainer.innerHTML = ""; // Limpa o conteúdo antes de renderizar
 
-  const items = renderListaPortugues
-    .map(
-      (item, index) => `
-    <li>
-      ${item.pergunta}: ${item.resposta.join(", ")}
-      <button data-id="${index}" onclick="editarItemP(event)">Editar</button>
-    </li>
-  `
-    )
-    .join("");
-
-  listaContainer.innerHTML = items;
+  renderListaPortugues.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.setAttribute("draggable", true);
+    li.dataset.id = index;
+    li.innerHTML = `${item.pergunta}: ${item.resposta.join(", ")}
+      <button onclick="editarItemP(event)">Editar</button>
+      <button onclick="apagarItemP(event)">Apagar</button>`;
+    li.addEventListener("dragstart", handleDragStart);
+    li.addEventListener("dragover", handleDragOver);
+    li.addEventListener("drop", handleDrop);
+    document.getElementById("listaPortuguesContainer").appendChild(li);
+  });
 };
 
+// Função de inicialização
 const iniciar = () => {
   inglesLista();
   PortuguesLista();
 };
 
+// Funções para arrastar e soltar
+let draggedItem = null;
+
+const handleDragStart = (event) => {
+  draggedItem = event.target;
+  event.target.classList.add("dragging");
+};
+
+const handleDragOver = (event) => {
+  event.preventDefault();
+};
+
+const handleDrop = (event) => {
+  event.preventDefault();
+  const target = event.target;
+  if (target.tagName === "LI" && target !== draggedItem) {
+    const container = target.parentNode;
+    const draggedIndex = Array.from(container.children).indexOf(draggedItem);
+    const targetIndex = Array.from(container.children).indexOf(target);
+
+    // Move o item arrastado para a nova posição
+    container.insertBefore(draggedItem, target.nextSibling);
+
+    // Atualiza as listas
+    if (container.id === "listaInglesContainer") {
+      const item = renderListaIngles.splice(draggedIndex, 1)[0];
+      renderListaIngles.splice(targetIndex, 0, item);
+      localStorage.setItem("listaInglesLG", JSON.stringify(renderListaIngles));
+    } else {
+      const item = renderListaPortugues.splice(draggedIndex, 1)[0];
+      renderListaPortugues.splice(targetIndex, 0, item);
+      localStorage.setItem(
+        "listaPortuguesLG",
+        JSON.stringify(renderListaPortugues)
+      );
+    }
+
+    // Re-renderiza a lista
+    inglesLista();
+    PortuguesLista();
+  }
+  draggedItem.classList.remove("dragging");
+  draggedItem = null;
+};
+
 // Função para editar um item da lista em inglês
 const editarItemI = (event) => {
-  const itemId = parseInt(event.target.getAttribute("data-id"));
+  const itemId = parseInt(event.target.parentNode.dataset.id);
   const item = renderListaIngles[itemId];
 
   const novaPergunta = prompt("Edite a pergunta:", item.pergunta);
-  const novaResposta = prompt(
-    "Edite a resposta:",
-    item.resposta.join(", ")
-  ).split(", ");
+  const novaResposta = prompt("Edite a resposta:", item.resposta.join(", "))
+    .split(", ")
+    .map((res) => res.trim());
 
-  // Atualiza os valores no array
-  renderListaIngles[itemId].pergunta = novaPergunta;
-  renderListaIngles[itemId].resposta = novaResposta;
+  if (novaPergunta && novaResposta.length > 0) {
+    renderListaIngles[itemId] = {
+      pergunta: novaPergunta,
+      resposta: novaResposta,
+    };
+    localStorage.setItem("listaInglesLG", JSON.stringify(renderListaIngles));
+    inglesLista();
+  } else {
+    alert("Por favor, forneça uma pergunta e pelo menos uma resposta.");
+  }
+};
 
-  // Atualiza o localStorage
-  localStorage.setItem("listaInglesLG", JSON.stringify(renderListaIngles));
+// Função para apagar um item da lista em inglês
+const apagarItemI = (event) => {
+  const itemId = parseInt(event.target.parentNode.dataset.id);
+  const item = renderListaIngles[itemId];
 
-  // Re-renderiza a lista após a edição
-  inglesLista();
+  const confirmar = confirm(
+    `Você tem certeza que deseja apagar o item: "${item.pergunta}"?`
+  );
+
+  if (confirmar) {
+    renderListaIngles.splice(itemId, 1);
+    localStorage.setItem("listaInglesLG", JSON.stringify(renderListaIngles));
+    inglesLista();
+    alert("Item apagado com sucesso!");
+  } else {
+    alert("Ação cancelada. O item não foi apagado.");
+  }
 };
 
 // Função para editar um item da lista em português
 const editarItemP = (event) => {
-  const itemId = parseInt(event.target.getAttribute("data-id"));
+  const itemId = parseInt(event.target.parentNode.dataset.id);
   const item = renderListaPortugues[itemId];
 
   const novaPergunta = prompt("Edite a pergunta:", item.pergunta);
-  const novaResposta = prompt(
-    "Edite a resposta:",
-    item.resposta.join(", ")
-  ).split(", ");
+  const novaResposta = prompt("Edite a resposta:", item.resposta.join(", "))
+    .split(", ")
+    .map((res) => res.trim());
 
-  // Atualiza os valores no array
-  renderListaPortugues[itemId].pergunta = novaPergunta;
-  renderListaPortugues[itemId].resposta = novaResposta;
+  if (novaPergunta && novaResposta.length > 0) {
+    renderListaPortugues[itemId] = {
+      pergunta: novaPergunta,
+      resposta: novaResposta,
+    };
+    localStorage.setItem(
+      "listaPortuguesLG",
+      JSON.stringify(renderListaPortugues)
+    );
+    PortuguesLista();
+  } else {
+    alert("Por favor, forneça uma pergunta e pelo menos uma resposta.");
+  }
+};
 
-  // Atualiza o localStorage
-  localStorage.setItem(
-    "listaPortuguesLG",
-    JSON.stringify(renderListaPortugues)
+// Função para apagar um item da lista em português
+const apagarItemP = (event) => {
+  const itemId = parseInt(event.target.parentNode.dataset.id);
+  const item = renderListaPortugues[itemId];
+
+  const confirmar = confirm(
+    `Você tem certeza que deseja apagar o item: "${item.pergunta}"?`
   );
 
-  // Re-renderiza a lista após a edição
-  PortuguesLista();
+  if (confirmar) {
+    renderListaPortugues.splice(itemId, 1);
+    localStorage.setItem(
+      "listaPortuguesLG",
+      JSON.stringify(renderListaPortugues)
+    );
+    PortuguesLista();
+    alert("Item apagado com sucesso!");
+  } else {
+    alert("Ação cancelada. O item não foi apagado.");
+  }
 };
 
 // Função para adicionar um novo item à lista em inglês
 const adicionarIngles = () => {
-  // Solicita a pergunta e a resposta do usuário
   const pergunta = prompt("Digite a pergunta em inglês:");
-  const resposta = prompt("Digite a resposta (separada por vírgulas):").split(", ");
+  const resposta = prompt("Digite a resposta (separada por vírgulas):")
+    .split(", ")
+    .map((res) => res.trim());
 
-  // Cria um novo item
-  const novoItem = {
-    pergunta: pergunta,
-    resposta: resposta
-  };
-
-  // Adiciona o novo item à lista existente
-  renderListaIngles.push(novoItem);
-
-  // Atualiza o localStorage com a lista modificada
-  localStorage.setItem("listaInglesLG", JSON.stringify(renderListaIngles));
-
-  // Re-renderiza a lista após adicionar o novo item
-  inglesLista();
+  if (pergunta && resposta.length > 0) {
+    const novoItem = { pergunta, resposta };
+    renderListaIngles.push(novoItem);
+    localStorage.setItem("listaInglesLG", JSON.stringify(renderListaIngles));
+    inglesLista();
+  } else {
+    alert("Por favor, forneça uma pergunta e pelo menos uma resposta.");
+  }
 };
-// Função para adicionar um novo item à lista em inglês
+
+// Função para adicionar um novo item à lista em português
 const adicionarPortugues = () => {
-  // Solicita a pergunta e a resposta do usuário
-  const pergunta = prompt("Digite a pergunta em inglês:");
-  const resposta = prompt("Digite a resposta (separada por vírgulas):").split(", ");
+  const pergunta = prompt("Digite a pergunta em português:");
+  const resposta = prompt("Digite a resposta (separada por vírgulas):")
+    .split(", ")
+    .map((res) => res.trim());
 
-  // Cria um novo item
-  const novoItem = {
-    pergunta: pergunta,
-    resposta: resposta
-  };
-
-  // Adiciona o novo item à lista existente
-  renderListaPortugues.push(novoItem);
-
-  // Atualiza o localStorage com a lista modificada
-  localStorage.setItem("listaPortuguesLG", JSON.stringify(renderListaPortugues));
-
-  // Re-renderiza a lista após adicionar o novo item
-  PortuguesLista();
+  if (pergunta && resposta.length > 0) {
+    const novoItem = { pergunta, resposta };
+    renderListaPortugues.push(novoItem);
+    localStorage.setItem(
+      "listaPortuguesLG",
+      JSON.stringify(renderListaPortugues)
+    );
+    PortuguesLista();
+  } else {
+    alert("Por favor, forneça uma pergunta e pelo menos uma resposta.");
+  }
 };
-
 
 // Função para limpar o localStorage e mostrar um alerta
 const clearStorageBtn = () => {
-  // Limpa todo o localStorage
   localStorage.clear();
-
-  // Exibe uma mensagem de confirmação
   alert("Local Storage restaurado com sucesso!");
-
-  // Atualiza as listas após limpar o localStorage
   iniciar();
 };
 
