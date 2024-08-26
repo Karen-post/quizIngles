@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Simples</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+     <button onclick="embaralhar()">Embaralhar Ordem</button>
+     <br><br> <br><br>
+    <div class="quiz-container">
+      <button class="btnir"><a href="./indexport.html">Ir para o outro</a></button>
+      <button class="btnir"><a href="./lista.html">Ir para lista</a></button>
+      <h1>Quiz de Perguntas Inglês</h1>
+      <div class="question-container">
+        <p id="question">Carregando pergunta...</p>
+        <input
+          type="text"
+          id="answerInput"
+          placeholder="Digite sua resposta aqui"
+        />
+        <button onclick="checkAnswer()">Enviar</button>
+      </div>
+      <p id="result"></p>
+      <div class="btnContainer">
+        <button id="prevBtn" onclick="prevQuestion()" >
+          Voltar
+        </button>
+        <button id="showAnswerBtn" onclick="showAnswer()" >
+          Ver Resposta
+        </button>
+        <button id="nextBtn" onclick="nextQuestion()">
+          Próxima
+        </button>
+      </div>
+    </div>
+    <script src="lista.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

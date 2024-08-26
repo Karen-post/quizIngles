@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styleslista.css" />
+</head>
+<body>
+    <div class="containerBotao">
+        <button class="limpar" onclick="clearStorageBtn()">Limpar Local Storage</button>
+        <div class="btnir"><a href="./index.html">Ir para Quiz</a></div>
+
+        <button  onclick="adicionarIngles()">Adicionar Em ingles pergunta</button>
+        <button  onclick="adicionarPortugues()">Adicionar Em portugues pergunta</button>
+    </div>
+    <div class="listadePerguntas">
+        <div class="portugues">
+            <h3>Português</h3>
+            <ul id="listaPortuguesContainer"></ul>
+        </div>
+        <div class="ingles">
+            <h3>Inglês</h3>
+            <ul id="listaInglesContainer"></ul>
+        </div>
+    </div>
+    <script src="lista.js"></script>
+    <script src="scriptEdit.js"></script>
+</body>
+</html>
