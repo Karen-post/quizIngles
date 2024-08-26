@@ -122,7 +122,7 @@ function embaralharArray(array) {
 
 // Função para embaralhar as perguntas
 function embaralhar() {
-  embaralharArray(quizIngles);
+  embaralharArray(quizPortugues);
   currentQuestionIndex = 0; // Reinicia a indexação das perguntas
   loadQuestion(); // Carrega a primeira pergunta da nova ordem
 }
